@@ -24,4 +24,11 @@ class TodoController(private val todoService: TodoService) {
         return todoService.updateTodo(todo)
     }
 
+    @DeleteMapping("/todos/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteTodo(@PathVariable id: Long): Todo? {
+        todoService.deleteTodo(id)
+        return null
+    }
+
 }

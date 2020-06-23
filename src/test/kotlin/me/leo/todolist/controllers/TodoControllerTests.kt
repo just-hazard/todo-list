@@ -4,14 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import me.leo.todolist.models.Todo
 import me.leo.todolist.repositories.TodoRepository
 import org.hamcrest.Matchers.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import javax.persistence.EntityNotFoundException
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -76,7 +79,7 @@ class TodoControllerTests (
 
         // when
         // 넣어놓은 해당 키값에 데이터를 수정하여 요청
-        val todoPutResult = mockMvc.perform(put("/todos")
+        val todoPutResult = mockMvc.perform(put("/todos/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateResult))
 
@@ -88,4 +91,26 @@ class TodoControllerTests (
                 .andExpect(jsonPath("$.done").value(true))
     }
 
+    @Test
+    fun deleteTodo() {
+        // given
+        // 삭제할 데이터 추가
+        val id = 1L;
+        val todo: Todo = Todo(id,"This is title", "Description!!!", false)
+        todoRepository.save(todo)
+
+        // when
+        // request 요청에 삭제할 id를 parameter로 넘기고 perform 구현
+        val todoDeleteResult = mockMvc.perform(delete("/todos/" + id))
+
+
+        // then
+        // reponse 요청에서 성공적으로 동작하면 204
+        todoDeleteResult.andExpect(status().isNoContent)
+                .andExpect(content().string(""))
+
+        Assertions.assertThrows(JpaObjectRetrievalFailureException::class.java) {
+            todoRepository.getOne(id)
+        }
+    }
 }

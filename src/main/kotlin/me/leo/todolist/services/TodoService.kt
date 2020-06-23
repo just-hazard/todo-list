@@ -17,4 +17,8 @@ class TodoService(private val todoRepository: TodoRepository) {
     fun updateTodo(todo: Todo): Todo {
         return todoRepository.save(todo)
     }
+
+    fun deleteTodo(id: Long) {
+        todoRepository.deleteById(id)
+    }
 }
